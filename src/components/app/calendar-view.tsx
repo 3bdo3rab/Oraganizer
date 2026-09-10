@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/dialog";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { fmtDateFull, todayStr, WEEK_DAYS_AR } from "@/lib/utils-app";
+import { fmtDateFull, fmtTimeIn, todayStr, WEEK_DAYS_AR } from "@/lib/utils-app";
 import type { Task } from "@/lib/types";
 import { EmptyState } from "./shared";
+import { useClockFormat } from "./clock";
 import { TaskFormDialog } from "./task-form";
 
 type EventKind = "visit" | "followup" | "task";
@@ -56,6 +57,7 @@ export function CalendarView() {
   const visits = useStore((s) => s.visits);
   const clients = useStore((s) => s.clients);
   const toggleTask = useStore((s) => s.toggleTask);
+  const clockFormat = useClockFormat();
 
   const today = todayStr();
   const [cursor, setCursor] = useState(() => {
@@ -77,7 +79,7 @@ export function CalendarView() {
       map.set(date, arr);
     };
     for (const t of tasks) {
-      push(t.date, { kind: "task", label: t.title, sub: t.time, taskId: t.id });
+      push(t.date, { kind: "task", label: t.title, sub: t.time ? fmtTimeIn(t.time, clockFormat) : undefined, taskId: t.id });
     }
     for (const v of visits) {
       push(v.date, { kind: "visit", label: nameOf(v.clientId), sub: v.result });
@@ -87,7 +89,7 @@ export function CalendarView() {
       if (c.followUpDate) push(c.followUpDate, { kind: "followup", label: `متابعة عميل: ${c.name}` });
     }
     return map;
-  }, [tasks, visits, clients]);
+  }, [tasks, visits, clients, clockFormat]);
 
   /** خلايا الشبكة */
   const cells = useMemo(() => {
@@ -230,7 +232,7 @@ export function CalendarView() {
                       <span className={cn("flex-1 text-sm", t.completed && "text-muted-foreground line-through")}>
                         {t.title}
                       </span>
-                      {t.time ? <Badge variant="secondary">{t.time}</Badge> : null}
+                      {t.time ? <Badge variant="secondary" className="tabular-nums">{fmtTimeIn(t.time, clockFormat)}</Badge> : null}
                     </li>
                   ))}
                 </ul>

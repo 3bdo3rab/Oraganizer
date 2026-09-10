@@ -20,12 +20,15 @@ import {
   PRIORITY_ORDER,
   addDaysStr,
   fmtDate,
+  fmtTimeIn,
+  fmtTodayFull,
   greeting,
   relDay,
   todayStr,
 } from "@/lib/utils-app";
 import { cn } from "@/lib/utils";
 import { PriorityBadge, StatusBadge } from "./shared";
+import { DigitalClock, useClockFormat } from "./clock";
 import type { NavFn } from "./nav-types";
 
 export function Dashboard({ navigate }: { navigate: NavFn }) {
@@ -39,6 +42,7 @@ export function Dashboard({ navigate }: { navigate: NavFn }) {
   const projectCategories = useStore((s) => s.projectCategories);
 
   const [quick, setQuick] = useState("");
+  const clockFormat = useClockFormat();
   const today = todayStr();
 
   const todayTasks = useMemo(
@@ -111,12 +115,13 @@ export function Dashboard({ navigate }: { navigate: NavFn }) {
 
   return (
     <div className="space-y-5">
-      {/* ترحيب */}
+      {/* ترحيب + التاريخ وساعة رقمية كبيرة تحته */}
       <section>
         <h2 className="text-xl font-extrabold sm:text-2xl">
           {greeting()} <span className="text-primary">👋</span>
         </h2>
-        <p className="text-sm text-muted-foreground">هذه حالة عملك اليوم بنظرة سريعة</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">{fmtTodayFull()}</p>
+        <DigitalClock className="mt-3" />
       </section>
 
       {/* ملخص سريع */}
@@ -182,8 +187,8 @@ export function Dashboard({ navigate }: { navigate: NavFn }) {
                       </span>
                       {!t.completed && <PriorityBadge priority={t.priority} />}
                       {t.time ? (
-                        <Badge variant="secondary" className="shrink-0">
-                          {t.time}
+                        <Badge variant="secondary" className="shrink-0 tabular-nums">
+                          {fmtTimeIn(t.time, clockFormat)}
                         </Badge>
                       ) : null}
                     </li>

@@ -99,6 +99,8 @@ export function defaultSettings(): AppSettings {
   return {
     appName: "منظّمي الشخصي",
     stageNames: ["التصميم والتجهيز", "البناء والتطوير", "الاختبار والتسليم"],
+    clockFormat: "12",
+    fontScale: 100,
   };
 }
 

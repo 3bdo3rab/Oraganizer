@@ -18,3 +18,23 @@ Stage Summary:
 - التطبيق مكتمل ويعمل على منفذ 3000 مع حفظ محلي كامل في متصفح المستخدم (وفق نطاق «يعمل محليًا دون خدمات خارجية»).
 - الملفات الرئيسية: src/app/{layout,page,globals.css}، src/lib/{types,store,utils-app}.ts، src/components/app/{app-shell,dashboard,tasks-view,calendar-view,projects-view,clients-view,visits-view,services-view,notes-view,settings-view,task-form,visit-form,shared,nav-types}.tsx
 - مراحل المواصفات الثلاث مُنفّذة دفعة واحدة (واجهة + وظائف + بيانات + اختبار). ما بعد النسخة الأساسية (عروض أسعار، نسخ احتياطي، إحصائيات) خارج النطاق عمدًا.
+
+---
+Task ID: 2
+Agent: Super Z (main agent)
+Task: تعديل مستقل بناءً على طلب المستخدم: ① ساعة رقمية بخط كبير نسبيًا تحت التاريخ ② إضافة حجم الخط في الإعدادات ③ إضافة نمط الساعة (12/24 ساعة).
+
+Work Log:
+- types.ts: أضفت النوع ClockFormat وحقلي settings اختياريين clockFormat وfontScale (اختياريان لتوافق بيانات localStorage القديمة دون ترحيل).
+- store.ts: defaultSettings الآن تتضمن clockFormat: "12" وfontScale: 100.
+- utils-app.ts: أضفت clockParts (أجزاء الوقت حسب النمط مع تثبيت الأصفار) وfmtTimeIn (عرض وقت مخزّن HH:mm حسب النمط).
+- مكوّن جديد src/components/app/clock.tsx: خُطّاف useNow (تحديث كل ثانية بتهيئة كسولة — يتجنّب قاعدة set-state-in-effect) وخُطّاف useClockFormat ومكوّن DigitalClock بحجمين (hero للرئيسية بأرقام mono مع ثوانٍ صغيرة وص/م بلون أساسي، sm للترويسة).
+- dashboard.tsx: قسم الترحيب أصبح: تحية ← التاريخ الكامل ← ساعة رقمية كبيرة تحته مباشرة، وشارة وقت المهمة تتبع نمط الساعة.
+- app-shell.tsx: ساعة مدمجة بجانب تاريخ الترويسة (تظهر أيضًا على الجوال)، وتأثير useEffect يطبّق fontScale على documentElement.style.fontSize فورًا مع كل تغيير.
+- settings-view.tsx: بطاقتان جديدتان بعد الوضع الليلي: «حجم الخط» (4 خيارات 90/100/110/125% بعيّنة خط متدرجة، يحفظ تلقائيًا) و«نمط الساعة» (زرّا 12/24 مع مثال ومعاينة حية للساعة في ترويسة البطاقة).
+- tasks-view.tsx وcalendar-view.tsx: توحيد عرض أوقات المهام (الشارات وأحداث اليوم) عبر fmtTimeIn حتى يطابق التطبيق كله النمط المختار.
+- فحوصات: eslint نظيف (أصلحت set-state-in-effect)، tsc نظيف لكود src/، اختبار بالمتصفح: الرئيسية 12↔24 فوري، الثواني تتقدم، تكبير الخط 125% يكبر كل الواجهة، الاستمرارية بعد reload (localStorage munazzimi-v1: clockFormat/fontScale محفوظان)، عرض جوال 390px سليم، لا أخطاء كونسول.
+
+Stage Summary:
+- التعديلات الثلاثة منجزة وتعمل وفق فلسفة «التعديلات المستقلة»: إعدادات جديدة اختيارية متوافقة مع البيانات القديمة، والحفظ محلي كالعادة.
+- الملفات المتأثرة: src/lib/{types,store,utils-app}.ts، src/components/app/{clock.tsx جديد, dashboard, app-shell, settings-view, tasks-view, calendar-view}.tsx

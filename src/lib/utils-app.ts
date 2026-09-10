@@ -1,4 +1,4 @@
-import type { ClientStatus, StageIndex, TaskPriority } from "./types";
+import type { ClientStatus, ClockFormat, StageIndex, TaskPriority } from "./types";
 
 /* ---------- معرّفات ---------- */
 export function uid(): string {
@@ -90,6 +90,29 @@ export function fmtTime(t?: string): string {
   if (h > 12) h -= 12;
   if (h === 0) h = 12;
   return `${h}:${m} ${period}`;
+}
+
+/* ---------- الساعة الرقمية ---------- */
+
+/** أجزاء الوقت الحالي حسب نمط الساعة (12 أو 24) */
+export function clockParts(d: Date, format: ClockFormat): { main: string; seconds: string; period: string } {
+  const h24 = d.getHours();
+  const m = String(d.getMinutes()).padStart(2, "0");
+  const s = String(d.getSeconds()).padStart(2, "0");
+  if (format === "24") {
+    return { main: `${String(h24).padStart(2, "0")}:${m}`, seconds: s, period: "" };
+  }
+  const period = h24 >= 12 ? "م" : "ص";
+  let h = h24 % 12;
+  if (h === 0) h = 12;
+  return { main: `${String(h).padStart(2, "0")}:${m}`, seconds: s, period };
+}
+
+/** وقت مخزّن بصيغة HH:mm معروض حسب نمط الساعة المختار */
+export function fmtTimeIn(t: string | undefined, format: ClockFormat): string {
+  if (!t) return "";
+  if (format === "24") return t;
+  return fmtTime(t);
 }
 
 /* ---------- أموال ---------- */

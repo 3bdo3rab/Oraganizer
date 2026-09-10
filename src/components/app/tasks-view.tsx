@@ -9,10 +9,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { makeTask, useStore } from "@/lib/store";
-import { PRIORITY_ORDER, fmtDate, fmtTime, relDay, todayStr } from "@/lib/utils-app";
+import { PRIORITY_ORDER, fmtDate, fmtTimeIn, relDay, todayStr } from "@/lib/utils-app";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/types";
 import { ConfirmDelete, EmptyState, PriorityBadge } from "./shared";
+import { useClockFormat } from "./clock";
 import { TaskFormDialog } from "./task-form";
 
 type Filter = "all" | "today" | "upcoming" | "overdue" | "done";
@@ -30,6 +31,7 @@ function TaskRow({
   const deleteTask = useStore((s) => s.deleteTask);
   const projects = useStore((s) => s.projects);
   const clients = useStore((s) => s.clients);
+  const clockFormat = useClockFormat();
   const project = projects.find((p) => p.id === task.projectId);
   const client = clients.find((c) => c.id === task.clientId);
 
@@ -56,7 +58,7 @@ function TaskRow({
             </Badge>
           ) : null}
           {task.time ? (
-            <Badge variant="secondary">{fmtTime(task.time)}</Badge>
+            <Badge variant="secondary" className="tabular-nums">{fmtTimeIn(task.time, clockFormat)}</Badge>
           ) : null}
           {project ? (
             <Badge variant="outline" className="text-primary border-primary/30">

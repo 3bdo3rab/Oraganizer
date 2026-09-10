@@ -16,11 +16,13 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { fmtTodayFull } from "@/lib/utils-app";
+import { DigitalClock } from "./clock";
 
 export type ViewKey =
   | "dashboard"
@@ -122,6 +124,12 @@ export function AppShell({
   children: ReactNode;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const fontScale = useStore((s) => s.settings.fontScale ?? 100);
+
+  /* تطبيق حجم الخط المختار على التطبيق كله */
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${fontScale}%`;
+  }, [fontScale]);
   const current = NAV_ITEMS.find((n) => n.key === view) ?? NAV_ITEMS[0];
   const go = (v: ViewKey) => {
     onNavigate(v);
@@ -175,7 +183,10 @@ export function AppShell({
               </SheetContent>
             </Sheet>
             <h1 className="text-lg font-extrabold">{current.label}</h1>
-            <span className="ms-auto hidden text-xs text-muted-foreground sm:block">{fmtTodayFull()}</span>
+            <div className="ms-auto flex items-center gap-2.5">
+              <span className="hidden text-xs text-muted-foreground sm:block">{fmtTodayFull()}</span>
+              <DigitalClock size="sm" />
+            </div>
             <span className="ms-auto lg:hidden">
               <DarkToggle />
             </span>

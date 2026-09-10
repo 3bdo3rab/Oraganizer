@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, FolderKanban, Moon, Pencil, Plus, Trash2 } from "lucide-react";
+import { ALargeSmall, Briefcase, Clock3, FolderKanban, Moon, Pencil, Plus, Trash2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -21,7 +21,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import { DigitalClock, useClockFormat } from "./clock";
 import type { NavFn } from "./nav-types";
+
+/* ---------- خيارات حجم الخط ---------- */
+const FONT_SCALES = [
+  { value: 90, label: "صغير", sample: "text-sm" },
+  { value: 100, label: "عادي", sample: "text-base" },
+  { value: 110, label: "كبير", sample: "text-lg" },
+  { value: 125, label: "أكبر", sample: "text-xl" },
+] as const;
 
 /* ---------- مدير التصنيفات ---------- */
 function CategoryManager({
@@ -148,6 +158,8 @@ export function SettingsView({ navigate }: { navigate: NavFn }) {
   const updateSettings = useStore((s) => s.updateSettings);
   const resetAll = useStore((s) => s.resetAll);
   const services = useStore((s) => s.services);
+  const fontScale = settings.fontScale ?? 100;
+  const clockFormat = useClockFormat();
   const { resolvedTheme, setTheme } = useTheme();
 
   const [stages, setStages] = useState<[string, string, string]>(settings.stageNames);
@@ -213,6 +225,81 @@ export function SettingsView({ navigate }: { navigate: NavFn }) {
             onCheckedChange={(v) => setTheme(v ? "dark" : "light")}
             aria-label="تبديل الوضع الليلي"
           />
+        </CardContent>
+      </Card>
+
+      {/* حجم الخط */}
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <div className="flex items-center gap-3">
+            <ALargeSmall className="size-4.5 text-primary" />
+            <div className="flex-1">
+              <h3 className="font-bold">حجم الخط</h3>
+              <p className="text-xs text-muted-foreground">اضبط حجم الخط في التطبيق كاملاً — يُحفظ تلقائيًا</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {FONT_SCALES.map((o) => {
+              const active = fontScale === o.value;
+              return (
+                <button
+                  key={o.value}
+                  onClick={() => updateSettings({ fontScale: o.value })}
+                  aria-pressed={active}
+                  className={cn(
+                    "flex flex-col items-center gap-1 rounded-lg border px-2 py-2.5 transition-colors",
+                    active
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-accent"
+                  )}
+                >
+                  <span className={cn("font-extrabold leading-none", o.sample)}>أأ</span>
+                  <span className="text-[11px] font-medium">{o.label}</span>
+                  <span className="text-[10px] text-muted-foreground">{o.value}%</span>
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* نمط الساعة */}
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <div className="flex items-center gap-3">
+            <Clock3 className="size-4.5 text-primary" />
+            <div className="flex-1">
+              <h3 className="font-bold">نمط الساعة</h3>
+              <p className="text-xs text-muted-foreground">يُطبّق على الساعة الرقمية وأوقات المهام</p>
+            </div>
+            <DigitalClock size="sm" className="shrink-0" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {([
+              { value: "12", label: "12 ساعة", example: "02:35 م" },
+              { value: "24", label: "24 ساعة", example: "14:35" },
+            ] as const).map((o) => {
+              const active = clockFormat === o.value;
+              return (
+                <button
+                  key={o.value}
+                  onClick={() => updateSettings({ clockFormat: o.value })}
+                  aria-pressed={active}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 rounded-lg border px-2 py-2.5 transition-colors",
+                    active
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-accent"
+                  )}
+                >
+                  <span className="text-sm font-bold">{o.label}</span>
+                  <span className="font-mono text-xs text-muted-foreground tabular-nums" dir="ltr">
+                    {o.example}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
 

@@ -124,9 +124,16 @@ export interface Note {
   updatedAt: string;
 }
 
+/** نمط عرض الساعة */
+export type ClockFormat = "12" | "24";
+
 export interface AppSettings {
   appName: string;
   stageNames: [string, string, string];
+  /** نمط الساعة: 12 أو 24 — اختياري لتوافق البيانات المحفوظة سابقًا */
+  clockFormat?: ClockFormat;
+  /** حجم الخط كنسبة مئوية: 90 / 100 / 110 / 125 */
+  fontScale?: number;
 }
 
 export interface AppData {
