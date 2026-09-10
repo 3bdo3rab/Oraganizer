@@ -9,6 +9,7 @@ import {
   EyeOff,
   FolderKanban,
   KeyRound,
+  List,
   LoaderCircle,
   Moon,
   Pencil,
@@ -36,7 +37,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useStore } from "@/lib/store";
-import { MODEL_HINTS, PROVIDER_LABELS } from "@/lib/ai";
+import { MODEL_HINTS, MODEL_SUGGESTIONS, PROVIDER_LABELS, normalizeModelName } from "@/lib/ai";
 import type { AIProvider } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -180,6 +181,8 @@ function AiKeyCard() {
 
   const [showKey, setShowKey] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [fetchedModels, setFetchedModels] = useState<string[] | null>(null);
+  const [loadingModels, setLoadingModels] = useState(false);
 
   /** تحديث حقل ضمن إعدادات الذكاء الاصطناعي — يُحفظ محليًا فورًا */
   const patchAi = (patch: Partial<typeof ai>) => {
@@ -196,8 +199,38 @@ function AiKeyCard() {
     }
   };
 
+  /** جلب الموديلات المتاحة فعليًا لدى المزوّد لهذا المفتاح */
+  const fetchModels = async () => {
+    if (!ai.apiKey.trim()) {
+      toast.error("أدخل المفتاح أولًا");
+      return;
+    }
+    setLoadingModels(true);
+    try {
+      const res = await fetch("/api/ai/models", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: ai.provider, apiKey: ai.apiKey.trim(), baseUrl: ai.baseUrl }),
+      });
+      const data = (await res.json()) as { ok?: boolean; models?: string[]; error?: string };
+      if (data?.ok && data.models?.length) {
+        setFetchedModels(data.models);
+        toast.success(`تم جلب ${data.models.length} موديل — اختر من القائمة`);
+      } else {
+        toast.error("تعذّر جلب الموديلات", { description: data?.error ?? `رمز الحالة ${res.status}` });
+      }
+    } catch {
+      toast.error("تعذّر الوصول إلى خدمة الاتصال المحلية");
+    } finally {
+      setLoadingModels(false);
+    }
+  };
+
   const testConnection = async () => {
-    if (!ai.model.trim() || !ai.apiKey.trim()) {
+    // تطبيع الاسم المحفوظ أولًا (مسافات/أحرف كبيرة/محارف خفية) ثم التحقق
+    const cleanModel = normalizeModelName(ai.provider, ai.model);
+    if (cleanModel && cleanModel !== ai.model) patchAi({ model: cleanModel });
+    if (!cleanModel || !ai.apiKey.trim()) {
       toast.error("أدخل اسم الموديل والمفتاح أولًا");
       return;
     }
@@ -208,7 +241,7 @@ function AiKeyCard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: ai.provider,
-          model: ai.model.trim(),
+          model: cleanModel,
           apiKey: ai.apiKey.trim(),
           baseUrl: ai.baseUrl,
           system: "أجب بإيجاز شديد.",
@@ -242,7 +275,7 @@ function AiKeyCard() {
         {/* المزوّد */}
         <div className="space-y-1">
           <label className="text-xs text-muted-foreground">المزوّد</label>
-          <Select value={ai.provider} onValueChange={(v) => patchAi({ provider: v as AIProvider })} dir="rtl">
+          <Select value={ai.provider} onValueChange={(v) => { patchAi({ provider: v as AIProvider }); setFetchedModels(null); }} dir="rtl">
             <SelectTrigger className="w-full" aria-label="اختيار المزوّد">
               <SelectValue />
             </SelectTrigger>
@@ -257,15 +290,56 @@ function AiKeyCard() {
         </div>
 
         {/* اسم الموديل */}
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <label className="text-xs text-muted-foreground">اسم الموديل</label>
           <Input
             value={ai.model}
             onChange={(e) => patchAi({ model: e.target.value })}
+            onBlur={() => {
+              const n = normalizeModelName(ai.provider, ai.model);
+              if (n && n !== ai.model) patchAi({ model: n });
+            }}
             placeholder={MODEL_HINTS[ai.provider]}
             dir="ltr"
             className="text-start"
           />
+          {/* اختيار سريع من موديلات شائعة صحيحة */}
+          {MODEL_SUGGESTIONS[ai.provider].length > 0 ? (
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
+              {MODEL_SUGGESTIONS[ai.provider].map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => patchAi({ model: m })}
+                  aria-pressed={ai.model === m}
+                  className={cn(
+                    "rounded-full border px-2.5 py-1 font-mono text-[11px] transition-colors",
+                    ai.model === m
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent"
+                  )}
+                  dir="ltr"
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {/* موديلات مُجلوبة فعليًا من المزوّد */}
+          {fetchedModels && fetchedModels.length > 0 ? (
+            <Select dir="rtl" onValueChange={(v) => { if (v) patchAi({ model: v }); }}>
+              <SelectTrigger className="w-full" aria-label="اختيار من موديلات المزوّد">
+                <SelectValue placeholder={`اختر من ${fetchedModels.length} موديل متاح…`} />
+              </SelectTrigger>
+              <SelectContent className="max-h-64">
+                {fetchedModels.map((m) => (
+                  <SelectItem key={m} value={m} className="font-mono text-xs" dir="ltr">
+                    {m}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
         </div>
 
         {/* عنوان الخدمة لمزوّد آخر */}
@@ -332,15 +406,26 @@ function AiKeyCard() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={testConnection} disabled={testing} className="shrink-0">
             {testing ? <LoaderCircle className="size-4 animate-spin" /> : <PlugZap className="size-4" />}
             {testing ? "جارٍ الاختبار…" : "اختبار الاتصال"}
           </Button>
-          <p className="text-[11px] leading-snug text-muted-foreground">
-            يُحفظ المفتاح محليًا على جهازك، ولا يُرسل إلا للمزوّد عند استخدام المساعد الذكي.
-          </p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={fetchModels}
+            disabled={loadingModels || !ai.apiKey.trim()}
+            className="shrink-0"
+          >
+            {loadingModels ? <LoaderCircle className="size-4 animate-spin" /> : <List className="size-4" />}
+            {loadingModels ? "جارٍ الجلب…" : "جلب الموديلات"}
+          </Button>
         </div>
+        <p className="text-[11px] leading-snug text-muted-foreground">
+          يُحفظ المفتاح محليًا على جهازك، ولا يُرسل إلا للمزوّد عند استخدام المساعد الذكي.
+        </p>
       </CardContent>
     </Card>
   );

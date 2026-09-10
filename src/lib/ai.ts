@@ -20,6 +20,36 @@ export const MODEL_HINTS: Record<AIProvider, string> = {
   custom: "اسم الموديل حسب مزوّدك",
 };
 
+/** موديلات شائعة صحيحة لكل مزوّد — تُعرض كأزرار اختيار سريع */
+export const MODEL_SUGGESTIONS: Record<AIProvider, string[]> = {
+  google: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-flash-latest"],
+  openai: ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "o4-mini"],
+  anthropic: ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1"],
+  groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "openai/gpt-oss-120b"],
+  custom: [],
+};
+
+/**
+ * تطبيع اسم الموديل قبل إرساله للمزوّد — يعالج الأسباب الشائعة لخطأ
+ * «unexpected model name format»:
+ *  - محارف اتجاه خفيّة (RTL/LTR marks) تتسلل عند الكتابة داخل واجهة عربية
+ *  - مسافات أو أحرف كبيرة مثل «Gemini 2.5 Flash»
+ *  - بادئة models/ منسوخة من مستندات جوجل
+ */
+export function normalizeModelName(provider: AIProvider, raw: string): string {
+  // إزالة محارف التحكم ومحارف الاتجاه والفواصل الصفرية نهائيًا
+  let m = raw.replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, "");
+  m = m.trim();
+  // جوجل تقبل أسماء بصيغة models/xxx في المسار — نزيلها لتجنب التكرار
+  m = m.replace(/^models\//i, "");
+  // المسافات الداخلية تصبح شرطات: «Gemini 2.5 Flash» → «gemini-2.5-flash»
+  m = m.replace(/\s+/g, "-");
+  // أسماء مزوّدين الرسميين كلها بأحرف صغيرة — جوجل صارم في هذا تحديدًا
+  if (provider !== "custom") m = m.toLowerCase();
+  // شرطات متتالية ناتجة عن مسافات مزدوجة
+  return m.replace(/-{2,}/g, "-").replace(/^-+|-+$/g, "");
+}
+
 /* ---------- برومبت النظام للمساعد الذكي ---------- */
 
 export const ASSISTANT_SYSTEM_PROMPT = `أنت «المساعد الذكي» في تطبيق «منظّمي الشخصي» — تطبيق شخصي عربي يدير مشاريع وعملاء محتملين وزيارات وخدمات ومهام لمستقل يعمل في التصميم والتطوير.

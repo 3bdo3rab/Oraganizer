@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { normalizeModelName } from "@/lib/ai";
 
 /**
  * مسار محلي يوحّد الاتصال بمزوّدي الذكاء الاصطناعي بمفتاح المستخدم.
@@ -41,6 +42,10 @@ async function readProviderError(res: Response): Promise<string> {
   }
   if (res.status === 404) {
     return `اسم الموديل غير موجود لدى المزوّد (${res.status})${detail ? `: ${detail}` : ""}`;
+  }
+  // خطأ تنسيق اسم الموديل من جوجل — نرجّم الاسم الصحيح بدل الرسالة التقنية
+  if (res.status === 400 && /model.{0,40}(format|name)|unexpected model/i.test(detail)) {
+    return `تنسيق اسم الموديل غير صحيح — يجب أن يكون بأحرف صغيرة وشرطات مثل: gemini-2.5-flash (بدون مسافات). جرّب زر «جلب الموديلات» لاختيار اسم صحيح.${detail ? `\nالتفصيل: ${detail}` : ""}`;
   }
   return `خطأ من المزوّد (${res.status})${detail ? `: ${detail}` : ""}`;
 }
@@ -178,7 +183,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const text = await callProvider({ provider, model: model.trim(), apiKey: apiKey.trim(), baseUrl, system, messages });
+    // تطبيع اسم الموديل يعالج المسافات/الأحرف الكبيرة/المحارف الخفية/بادئة models/
+    const cleanModel = normalizeModelName(provider, model);
+    if (!cleanModel) {
+      return NextResponse.json({ ok: false, error: "اسم الموديل غير صالح" }, { status: 400 });
+    }
+    const text = await callProvider({ provider, model: cleanModel, apiKey: apiKey.trim(), baseUrl, system, messages });
     return NextResponse.json({ ok: true, text });
   } catch (e) {
     const msg =

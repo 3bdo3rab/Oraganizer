@@ -58,3 +58,20 @@ Stage Summary:
 - الميزتان منجزتان وفق الملاحظة المعمارية للمستخدم: المفتاح محفوظ محليًا مع باقي البيانات، والمسار /api/ai/chat هو الجسر الوحيد للخدمة الخارجية ولا يرسل شيئًا إلا للمزوّد المختار.
 - المساعد يقرأ البيانات الفعلية لحظة كل سؤال عبر buildAppContext ويحقنها في برومبت النظام (آخر 20 رسالة كسياق محادثة).
 - الملفات: types/store/ai.ts جديد/api/ai/chat/route.ts جديد/assistant.tsx جديد/settings-view/app-shell/next.config.
+
+---
+Task ID: 4
+Agent: Super Z (main agent)
+Task: إصلاح خطأ «اختبار الاتصال» مع Google Gemini — «GenerateContentRequest.model: unexpected model name format» (400).
+
+Work Log:
+- التشخيص: الاسم المُدخل (مسافات/أحرف كبيرة مثل «Gemini 2.5 Flash» أو محارف اتجاه خفية RTL/LTR أو بادئة models/) لا يطابق صيغة Google الصارمة.
+- ai.ts: دالة normalizeModelName(provider, raw) — تنظيف محارف التحكم والاتجاه (\u200B-\u200F، \u202A-\u202E، \u2066-\u2069، \uFEFF)، إزالة بادئة models/، تحويل المسافات لشرطات، أحرف صغيرة لكل المزوّدين الرسميين (يتخطى «آخر»)، وتنظيف الشرطات المكررة. أضفت MODEL_SUGGESTIONS (4 موديلات شائعة لكل مزوّد).
+- api/ai/chat/route.ts: تطبيع الموديل قبل كل استدعاء + رسالة عربية ودّية عند 400 مع «model name format» ترشد لزر «جلب الموديلات».
+- مسار جديد api/ai/models/route.ts: جلب الموديلات المتاحة فعليًا بالمفتاح من كل المزوّدين (Google ListModels مفلترة على generateContent، OpenAI/Groq /v1/models، Anthropic /v1/models، و«آخر» من Base URL).
+- settings-view.tsx (AiKeyCard): تطبيع فوري عند مغادرة حقل الموديل، أزرار chips دائرية للاختيار السريع مع تظليل المختار، زر «جلب الموديلات» يعرض قائمة Select حقيقية من المزوّد، ومسح القائمة عند تغيير المزوّد.
+- اختبار بالمتصفح: «Gemini 2.5 Flash␣» تطبّع إلى gemini-2.5-flash، اختبار بمفتاح وهمي وصل Google وأعاد «API key not valid» (أي الصيغة صحيحة الآن والاعتراض انتقل للمفتاح)، زر جلب الموديلات يعمل بنفس المنطق، جوال 390px سليم، eslint وtsc نظيفان، لا أخطاء كونسول.
+
+Stage Summary:
+- سبب الخطأ الأصلي معالج من ثلاث طبقات: تطبيع تلقائي للاسم + اقتراحات جاهزة صحيحة + جلب القائمة الحقيقية من المزوّد.
+- ملفات: ai.ts، api/ai/chat/route.ts، api/ai/models/route.ts جديد، settings-view.tsx.
