@@ -22,6 +22,10 @@ function friendlyError(res: Response, detail: string): string {
   if (res.status === 429) {
     return `تجاوزت حد الاستخدام أو الطلبات (${res.status})${detail ? `: ${detail}` : ""}`;
   }
+  // حظر جغرافي — دولة المستخدم غير مدعومة لدى المزوّد
+  if (/location is not supported|not supported for the api use|country.*not supported/i.test(detail)) {
+    return "موقعك الجغرافي غير مدعوم لدى هذا المزوّد (حظر حسب الدولة وليس خطأ في مفتاحك). الحل الأسرع: اختر مزوّد «آخر (متوافق مع OpenAI)» واستخدم خدمة وسيطة مثل OpenRouter — تعبّئها بزر واحد من الإعدادات — أو فعِّل VPN من بلد مدعوم ثم أعد المحاولة.";
+  }
   return `خطأ من المزوّد (${res.status})${detail ? `: ${detail}` : ""}`;
 }
 

@@ -75,3 +75,21 @@ Work Log:
 Stage Summary:
 - سبب الخطأ الأصلي معالج من ثلاث طبقات: تطبيع تلقائي للاسم + اقتراحات جاهزة صحيحة + جلب القائمة الحقيقية من المزوّد.
 - ملفات: ai.ts، api/ai/chat/route.ts، api/ai/models/route.ts جديد، settings-view.tsx.
+
+---
+Task ID: 5
+Agent: Super Z (main agent)
+Task: معالجة خطأ «User location is not supported for the API use» (حظر جغرافي) + إضافة موديلات Gemini 3.x الجديدة.
+
+Work Log:
+- تشخيص: الخطأ ليس من المفتاح ولا من التطبيق — Google (وOpenAI وAnthropic) تحجب API حسب دولة عنوان IP، والدول المحظورة تشمل سوريا. بحث ويب أكّد السبب والحلول.
+- بحث ويب (z-ai web_search + قراءة ai.google.dev/gemini-api/docs/models): جيل 2026 الحالي هو Gemini 3.x — المعرفات الرسمية المؤكدة: gemini-3.8-flash و3.7 و3.6 و3.5-flash و3.5-flash-lite و3.1-pro و3.1-flash-lite، مع القديمة المستقرة 2.5.
+- ai.ts: تحديث MODEL_SUGGESTIONS.google إلى [3.8-flash، 3.6-flash، 3.5-flash، 3.5-flash-lite، 3.1-pro، 2.5-flash]، وMODEL_HINTS.google يذكر 3.8. أضفت مقترحات لمزوّد «آخر»: google/gemini-3.5-flash، google/gemini-2.5-flash، openai/gpt-4o-mini، deepseek/deepseek-chat.
+- المسارين api/ai/chat وapi/ai/models: رصد /location is not supported/i يعيد رسالة عربية تشرح أن الحظر جغرافي وليس خطأ مفتاح، وتقترح OpenRouter أو VPN.
+- settings-view.tsx قسم «آخر»: زر «تعبئة OpenRouter تلقائيًا» (Globe) يملأ https://openrouter.ai/api/v1 ويتظلل عند التفعيل، مع شرح مختصر (مفتاح من openrouter.ai فيه موديلات مجانية، موديلات بصيغة google/gemini-…).
+- اختبارات: bunx tsx — تطبيع «Gemini 3.8 Flash»←gemini-3.8-flash، إزالة بادئة models/، تنظيف محارف RTL الخفية، «آخر» يحفظ google/gemini-3.5-flash كما هو؛ regex الحظر الجغرافي يطابق نص Google الحرفي. متصفحًا: chips الجديدة ظاهرة لجيميني، تحويل المزوّد ل«آخر» يظهر chips الموديلات المركّبة وزر OpenRouter الذي ملأ الحقل فعلًا، لا أخطاء كونسول، eslint وtsc نظيفان.
+
+Stage Summary:
+- سبب فشل «اختبار الاتصال» الحقيقي للمستخدم: حظر جغرافي من Google لدولته — لا علاقة له بالموديل ولا المفتاح.
+- الحل المعمّق داخل التطبيق: مسار «آخر (متوافق مع OpenAI)» + OpenRouter بزر تعبئة واحد، ورسائل خطأ تشرح الخيارات (OpenRouter / VPN).
+- ملفات: ai.ts، api/ai/chat/route.ts، api/ai/models/route.ts، settings-view.tsx.

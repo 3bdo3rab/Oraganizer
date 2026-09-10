@@ -13,7 +13,7 @@ export const PROVIDER_LABELS: Record<AIProvider, string> = {
 };
 
 export const MODEL_HINTS: Record<AIProvider, string> = {
-  google: "مثل: gemini-2.5-flash",
+  google: "مثل: gemini-3.8-flash أو gemini-2.5-flash",
   openai: "مثل: gpt-4o-mini",
   anthropic: "مثل: claude-sonnet-4-5",
   groq: "مثل: llama-3.3-70b-versatile",
@@ -22,11 +22,23 @@ export const MODEL_HINTS: Record<AIProvider, string> = {
 
 /** موديلات شائعة صحيحة لكل مزوّد — تُعرض كأزرار اختيار سريع */
 export const MODEL_SUGGESTIONS: Record<AIProvider, string[]> = {
-  google: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-flash-latest"],
+  google: [
+    "gemini-3.8-flash",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-pro",
+    "gemini-2.5-flash",
+  ],
   openai: ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "o4-mini"],
   anthropic: ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1"],
   groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "openai/gpt-oss-120b"],
-  custom: [],
+  custom: [
+    "google/gemini-3.5-flash",
+    "google/gemini-2.5-flash",
+    "openai/gpt-4o-mini",
+    "deepseek/deepseek-chat",
+  ],
 };
 
 /**

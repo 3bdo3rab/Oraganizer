@@ -8,6 +8,7 @@ import {
   Eye,
   EyeOff,
   FolderKanban,
+  Globe,
   KeyRound,
   List,
   LoaderCircle,
@@ -344,7 +345,7 @@ function AiKeyCard() {
 
         {/* عنوان الخدمة لمزوّد آخر */}
         {ai.provider === "custom" ? (
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground">عنوان الخدمة (Base URL)</label>
             <Input
               value={ai.baseUrl ?? ""}
@@ -353,7 +354,24 @@ function AiKeyCard() {
               dir="ltr"
               className="text-start"
             />
-            <p className="text-[11px] text-muted-foreground">أي خدمة متوافقة مع واجهة OpenAI</p>
+            <button
+              type="button"
+              onClick={() => patchAi({ baseUrl: "https://openrouter.ai/api/v1" })}
+              aria-pressed={(ai.baseUrl ?? "").includes("openrouter")}
+              className={cn(
+                "rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors",
+                (ai.baseUrl ?? "").includes("openrouter")
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-accent"
+              )}
+            >
+              <Globe className="me-1 inline size-3" />
+              تعبئة OpenRouter تلقائيًا — يوفّر Gemini وGPT وClaude ويتجاوز الحظر الجغرافي
+            </button>
+            <p className="text-[11px] leading-snug text-muted-foreground">
+              أي خدمة متوافقة مع واجهة OpenAI. إن حصل حظر جغرافي مع Google مباشرة: أنشئ مفتاحًا من openrouter.ai
+              (فيه موديلات مجانية)، اضغط زر التعبئة أعلاه، ثم اختر موديلًا بصيغة google/gemini-…
+            </p>
           </div>
         ) : null}
 

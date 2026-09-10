@@ -1,0 +1,56 @@
+[
+  {
+    "url": "https://ai.google.dev",
+    "name": "Gemini deprecations | Gemini API - Google AI for Developers",
+    "snippet": "Gemini 3 models ; gemini-3.1-flash-image, May 28, 2026, No shutdown date announced ; gemini-3-pro-image, May 28, 2026, No shutdown date announced. Read more",
+    "host_name": "ai.google.dev",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models",
+    "name": "Release notes | Gemini API - Google AI for Developers",
+    "snippet": "2026 Released gemini -3.1- flash -image (Nano Banana 2) and gemini - 3 - pro -image (Nano Banana Pro ), the. Gemini 3.1 Flash Image and Gemini 3 Pro Image. will be shut ...",
+    "host_name": "docs.cloud.google.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://firebase.google.com/docs/ai-logic/models",
+    "name": "Learn about supported models | Firebase AI Logic - Google",
+    "snippet": "2 days ago — You can list all available models names using the REST API: General-use models Gemini 3.x Pro model names . Latest preview version of Gemini 3.x ...",
+    "host_name": "firebase.google.com",
+    "rank": 2,
+    "date": "Sep 8, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://aistudio.google.com/models/gemini-3",
+    "name": "Gemini 3",
+    "snippet": "Gemini 3.1 Pro . Advanced reasoning for coding and complex tasks ; Gemini 3.5 Flash. Frontier intelligence built for speed ; Gemini 3.1 Flash-Lite. Efficiency and ... Read more",
+    "host_name": "aistudio.google.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://en.wikipedia.org",
+    "name": "Gemini (language model)",
+    "snippet": "Comprising Gemini Pro , Gemini Deep Think, Gemini Flash , and Gemini Flash Lite, Gemini 3 Pro . February 2026 Latest version: Latest version Based on Gemini 3 ...",
+    "host_name": "en.wikipedia.org",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://platform.teamai.com",
+    "name": "7 Gemini Models Compared: Which to Use in 2026 (Pro, Flash",
+    "snippet": "Aug 3, 2026 — Compare every Gemini model in 2026: Gemini 3 Pro , 2.5 Pro, Flash, Ultra, Nano. Use cases, context windows, pricing, and which to pick for ...",
+    "host_name": "platform.teamai.com",
+    "rank": 5,
+    "date": "Aug 3, 2026",
+    "favicon": ""
+  }
+]

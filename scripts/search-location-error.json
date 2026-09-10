@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://github.com",
+    "name": "[GeminiPro] \"User location is not supported for the API use",
+    "snippet": "Feb 24, 2024 — Is there any way to implement workarounds for the \" User location is not supported for the API use \" issue in GeminiPro for those in ... Read more",
+    "host_name": "github.com",
+    "rank": 0,
+    "date": "Feb 24, 2024",
+    "favicon": ""
+  },
+  {
+    "url": "https://community.cloudflare.com",
+    "name": "Do not put Workers in LLM-forbidden locations",
+    "snippet": "Sep 15, 2024 — “ User location is not supported for the API use .” With LLM API adoption growing, this problem will only get bigger. A potential solution is ... Read more",
+    "host_name": "community.cloudflare.com",
+    "rank": 1,
+    "date": "Sep 15, 2024",
+    "favicon": ""
+  },
+  {
+    "url": "https://discuss.ai.google.dev",
+    "name": "API access issue → Region restriction - Gemini API",
+    "snippet": "Oct 8, 2025 — I am receiving a “FAILED_PRECONDITION: User location is not supported for the API use ” error when calling Gemini API from Vietnam.",
+    "host_name": "discuss.ai.google.dev",
+    "rank": 2,
+    "date": "Oct 8, 2025",
+    "favicon": ""
+  },
+  {
+    "url": "https://dicloak.com",
+    "name": "Gemini Unblock Guide 2025: How to Bypass Restrictions",
+    "snippet": "Nov 21, 2025 — Error: “ User location is not supported for the API use .” Some users trying to use Gemini's API from unsupported regions have seen this error. Read more",
+    "host_name": "dicloak.com",
+    "rank": 3,
+    "date": "Nov 21, 2025",
+    "favicon": ""
+  },
+  {
+    "url": "https://blog.chatgot.one",
+    "name": "Fixing the \"User Location is Not Supported\" Error  - Chat Got",
+    "snippet": "Dec 27, 2023 — When your user location is not supported, you may see errors like: 400 User location is not supported for the API use . This guide will ... Read more",
+    "host_name": "blog.chatgot.one",
+    "rank": 4,
+    "date": "Dec 27, 2023",
+    "favicon": ""
+  }
+]

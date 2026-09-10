@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://ai.google.dev",
+    "name": "Release notes | Gemini API - Google AI for Developers",
+    "snippet": "The gemini - 3.1 - flash -image-preview and gemini -3- pro -image-preview models are deprecated and will be shut down on June 25, 2026. May 25, 2026 The gemini - 3.1 - ...",
+    "host_name": "ai.google.dev",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://deepmind.google",
+    "name": "Gemini 3.5 Flash-Lite",
+    "snippet": "“ Gemini 3.5 Flash-Lite delivers the intelligence, speed, and cost efficiency needed for Ashler's agentic retrieval and tool-use tasks. Read more",
+    "host_name": "deepmind.google",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models",
+    "name": "Introducing Gemini 3.6 Flash, 3.5 Flash-Lite, and",
+    "snippet": "Jul 21, 2026 — 3.5 Flash-Lite is the fastest model in the 3.5 series . As measured by Artificial Analysis, it runs at 350 output tokens/s. Priced at $0.3/1M ...",
+    "host_name": "docs.cloud.google.com",
+    "rank": 2,
+    "date": "Jul 21, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://benchlm.ai",
+    "name": "Google - Gemini Models & API IDs",
+    "snippet": "6 days ago — Current Gemini and Gemma model list with provider-issued API IDs, release dates, lifecycle status, context windows, access, pricing, ...",
+    "host_name": "benchlm.ai",
+    "rank": 3,
+    "date": "Sep 4, 2026",
+    "favicon": ""
+  }
+]

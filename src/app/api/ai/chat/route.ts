@@ -40,6 +40,10 @@ async function readProviderError(res: Response): Promise<string> {
   if (res.status === 429) {
     return `تجاوزت حد الاستخدام أو الطلبات (${res.status})${detail ? `: ${detail}` : ""}`;
   }
+  // حظر جغرافي — دولة المستخدم غير مدعومة لدى المزوّد (شائع مع Google/OpenAI/Anthropic)
+  if (/location is not supported|not supported for the api use|country.*not supported/i.test(detail)) {
+    return "موقعك الجغرافي غير مدعوم لدى هذا المزوّد (حظر حسب الدولة وليس خطأ في مفتاحك). الحل الأسرع: اختر مزوّد «آخر (متوافق مع OpenAI)» واستخدم خدمة وسيطة مثل OpenRouter — تعبّئها بزر واحد من الإعدادات — أو فعِّل VPN من بلد مدعوم ثم أعد المحاولة.";
+  }
   if (res.status === 404) {
     return `اسم الموديل غير موجود لدى المزوّد (${res.status})${detail ? `: ${detail}` : ""}`;
   }
