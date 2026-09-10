@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 import type {
   AppData,
   AppSettings,
+  ChatMessage,
   Client,
   ID,
   Note,
@@ -101,6 +102,7 @@ export function defaultSettings(): AppSettings {
     stageNames: ["التصميم والتجهيز", "البناء والتطوير", "الاختبار والتسليم"],
     clockFormat: "12",
     fontScale: 100,
+    ai: { provider: "google", model: "", apiKey: "", baseUrl: "", notes: "" },
   };
 }
 
@@ -202,6 +204,16 @@ function seedData(): AppData {
     }),
   ];
 
+  const chat: ChatMessage[] = [
+    {
+      id: uid(),
+      role: "assistant",
+      content:
+        "مرحبًا 👋 أنا مساعدك الذكي في «منظّمي الشخصي».\nيمكنك أن تسألني أي شيء: تلخيص حالة مشاريعك، صياغة رسالة لعميل، أفكار تسويق، أو شرح أي مفهوم.\nلأجيبك بناءً على بياناتك الفعلية (مشاريعك وعملاؤك ومهامك) أضف مفتاح الذكاء الاصطناعي من الإعدادات أولًا.",
+      at: new Date().toISOString(),
+    },
+  ];
+
   return {
     projects: [project],
     clients: [client],
@@ -212,6 +224,7 @@ function seedData(): AppData {
     tasks,
     notes,
     settings: defaultSettings(),
+    chat,
   };
 }
 
@@ -254,6 +267,10 @@ interface AppState extends AppData {
   updateNote: (id: ID, patch: Partial<Note>) => void;
   deleteNote: (id: ID) => void;
 
+  /** إضافة رسالة للمحادثة (مع سقف 200 رسالة) */
+  addChatMessage: (m: { role: ChatMessage["role"]; content: string; isError?: boolean }) => void;
+  clearChat: () => void;
+
   updateSettings: (patch: Partial<AppSettings>) => void;
   resetAll: () => void;
 }
@@ -265,6 +282,7 @@ const emptyData = (): AppData => ({
   services: [],
   tasks: [],
   notes: [],
+  chat: [],
   ...defaultCategories(),
   settings: defaultSettings(),
 });
@@ -360,6 +378,18 @@ export const useStore = create<AppState>()(
         })),
       deleteNote: (id) => set((s) => ({ notes: s.notes.filter((n) => n.id !== id) })),
 
+      addChatMessage: (m) =>
+        set((s) => ({
+          chat: [
+            ...s.chat,
+            { id: uid(), role: m.role, content: m.content, isError: m.isError, at: new Date().toISOString() },
+          ].slice(-200),
+        })),
+      clearChat: () =>
+        set((s) => ({
+          chat: s.chat.slice(0, 1), // إبقاء رسالة الترحيب إن وُجدت
+        })),
+
       updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
       resetAll: () => set({ ...emptyData() }),
     }),
@@ -376,6 +406,7 @@ export const useStore = create<AppState>()(
         tasks: s.tasks,
         notes: s.notes,
         settings: s.settings,
+        chat: s.chat,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);

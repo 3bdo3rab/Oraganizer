@@ -22,6 +22,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { fmtTodayFull } from "@/lib/utils-app";
+import { AssistantDock } from "./assistant";
 import { DigitalClock } from "./clock";
 
 export type ViewKey =
@@ -225,6 +226,9 @@ export function AppShell({
           </button>
         </div>
       </nav>
+
+      {/* المساعد الذكي — زر عائم في كل الشاشات */}
+      <AssistantDock onNavigateSettings={() => go("settings")} />
     </div>
   );
 }

@@ -38,3 +38,23 @@ Work Log:
 Stage Summary:
 - التعديلات الثلاثة منجزة وتعمل وفق فلسفة «التعديلات المستقلة»: إعدادات جديدة اختيارية متوافقة مع البيانات القديمة، والحفظ محلي كالعادة.
 - الملفات المتأثرة: src/lib/{types,store,utils-app}.ts، src/components/app/{clock.tsx جديد, dashboard, app-shell, settings-view, tasks-view, calendar-view}.tsx
+
+---
+Task ID: 3
+Agent: Super Z (main agent)
+Task: تعديلان مستقلان بطلب المستخدم: ① قسم «مفتاح الذكاء الاصطناعي» في الإعدادات (مزوّد/موديل/مفتاح مخفي مع إظهار ونسخ + اختبار اتصال + ملاحظة) ② «المساعد الذكي»: زر عائم ونافذة شات عربية RTL تحفظ محليًا وتقرأ بيانات التطبيق الفعلية.
+
+Work Log:
+- types.ts: أضفت AIProvider وAISettings (provider/model/apiKey/baseUrl لمزوّد «آخر»/notes) وChatMessage، وحقلي AppSettings.ai وAppData.chat.
+- store.ts: defaultSettings تتضمن ai فارغة، رسالة ترحيب في seed chat، إجراءان addChatMessage (سقف 200 رسالة) وclearChat (يُبقي الترحيب)، وchat ضمن partialize لل حفظ المحلي.
+- ملف جديد src/lib/ai.ts: PROVIDER_LABELS وMODEL_HINTS لكل مزوّد، ASSISTANT_SYSTEM_PROMPT بالعربية (مساعد عام: شرح/صياغة رسائل/أفكار تسويق/تلخيص حالة، لا يخترع بيانات)، وbuildAppContext يبني ملخصًا عربيًا مضغوطًا للبيانات الفعلية (المشاريع بمراحلها وأسعارها، العملاء بحالاتهم ومواعيد المتابعة، المهام متأخرة/اليوم/قادمة، أحدث الزيارات، الخدمات، عناوين الملاحظات).
+- مسار جديد src/app/api/ai/chat/route.ts: وكيل محلي موحّد — Google Gemini (generateContent) وAnthropic (messages مع x-api-key) وOpenAI وGroq و«آخر» بواجهة OpenAI-compatible مع تطبيع Base URL، مهلة 90 ثانية، وتفسير أخطاء المزوّد لرسائل عربية واضحة (401 مفتاح غير صالح / 429 تجاوز الحد / 404 موديل غير موجود).
+- settings-view.tsx: بطاقة AiKeyCard — قائمة مزوّدين (Select)، موديل نص حر مع placeholder متغير، مفتاح type=password مع زر إظهار/إخفاء وزر نسخ للحافظة، حقل Base URL يظهر فقط لـ«آخر»، ملاحظة، زر «اختبار الاتصال» مع حالة تحميل وtoast نجاح/فشل، ونص خصوصية. حفظ فوري محلي.
+- مكوّن جديد src/components/app/assistant.tsx (AssistantDock): زر عائم Sparkles ثابت في كل الشاشات (bottom-20 على الجوال فوق شريط التنقل، bottom-6 لسطح المكتب)، Sheet جانبية يسار RTL عرضية sm:max-w-md، فقاعات رسائل (المستخدم يمين بتدرج أساسي، المساعد يسار بخلفية muted، أخطاء بإطار أحمر مع أيقونة)، مؤشر «يكتب…» بثلاث نقاط متحركة، أسفل إدخال Textarea بمتغير auto-grow وEnter للإرسال وShift+Enter سطر جديد، بطاقة «لا يوجد مفتاح» مع زر فتح الإعدادات (يغلق النافذة وينتقل)، زر «محادثة جديد» مع تأكيد AlertDialog، وتوقيت كل رسالة يتبع نمط الساعة المختار.
+- app-shell.tsx: ربط AssistantDock وتمرير onNavigateSettings. next.config.ts: devIndicators: false لإخفاء زر أدوات التطوير الذي كان يغطي الزر العائم.
+- الفحص بالمتصفح: النافذة والبطاقة يعملان، اختبار الاتصال بمفتاح وهمي وصل Google فعليًا وأعاد «المفتاح غير صالح (400)» داخل toast عربي واضح، إرسال رسالة في الشات أظهر الخطأ بفقاعة حمراء منسقة، الاستمرارية بعد reload (المفتاح + 3 رسائل في localStorage)، «محادثة جديدة» بمسح السجل مع الإبقاء على الترحيب، حقل Base URL يظهر لمزوّد «آخر»، عرض جوال 390px سليم، eslint نظيف ولا أخطاء كونسول.
+
+Stage Summary:
+- الميزتان منجزتان وفق الملاحظة المعمارية للمستخدم: المفتاح محفوظ محليًا مع باقي البيانات، والمسار /api/ai/chat هو الجسر الوحيد للخدمة الخارجية ولا يرسل شيئًا إلا للمزوّد المختار.
+- المساعد يقرأ البيانات الفعلية لحظة كل سؤال عبر buildAppContext ويحقنها في برومبت النظام (آخر 20 رسالة كسياق محادثة).
+- الملفات: types/store/ai.ts جديد/api/ai/chat/route.ts جديد/assistant.tsx جديد/settings-view/app-shell/next.config.

@@ -1,6 +1,21 @@
 "use client";
 
-import { ALargeSmall, Briefcase, Clock3, FolderKanban, Moon, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  ALargeSmall,
+  Briefcase,
+  Clock3,
+  Copy,
+  Eye,
+  EyeOff,
+  FolderKanban,
+  KeyRound,
+  LoaderCircle,
+  Moon,
+  Pencil,
+  PlugZap,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -21,7 +36,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useStore } from "@/lib/store";
+import { MODEL_HINTS, PROVIDER_LABELS } from "@/lib/ai";
+import type { AIProvider } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { DigitalClock, useClockFormat } from "./clock";
 import type { NavFn } from "./nav-types";
 
@@ -148,6 +167,180 @@ function CategoryManager({
         <p className="text-xs text-muted-foreground">
           حذف التصنيف لا يحذف العناصر المرتبطة به — تصبح بلا تصنيف فقط.
         </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ---------- بطاقة مفتاح الذكاء الاصطناعي ---------- */
+function AiKeyCard() {
+  const settings = useStore((s) => s.settings);
+  const updateSettings = useStore((s) => s.updateSettings);
+  const ai = settings.ai ?? { provider: "google" as AIProvider, model: "", apiKey: "", baseUrl: "", notes: "" };
+
+  const [showKey, setShowKey] = useState(false);
+  const [testing, setTesting] = useState(false);
+
+  /** تحديث حقل ضمن إعدادات الذكاء الاصطناعي — يُحفظ محليًا فورًا */
+  const patchAi = (patch: Partial<typeof ai>) => {
+    updateSettings({ ai: { ...ai, ...patch } });
+  };
+
+  const copyKey = async () => {
+    if (!ai.apiKey) return;
+    try {
+      await navigator.clipboard.writeText(ai.apiKey);
+      toast.success("تم نسخ المفتاح");
+    } catch {
+      toast.error("تعذّر النسخ من المتصفح");
+    }
+  };
+
+  const testConnection = async () => {
+    if (!ai.model.trim() || !ai.apiKey.trim()) {
+      toast.error("أدخل اسم الموديل والمفتاح أولًا");
+      return;
+    }
+    setTesting(true);
+    try {
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: ai.provider,
+          model: ai.model.trim(),
+          apiKey: ai.apiKey.trim(),
+          baseUrl: ai.baseUrl,
+          system: "أجب بإيجاز شديد.",
+          messages: [{ role: "user", content: "قل فقط: تم بنجاح" }],
+        }),
+      });
+      const data = (await res.json()) as { ok?: boolean; text?: string; error?: string };
+      if (data?.ok) {
+        toast.success("الاتصال يعمل بنجاح", { description: `رد الموديل: ${data.text?.slice(0, 60)}` });
+      } else {
+        toast.error("فشل الاتصال", { description: data?.error ?? `رمز الحالة ${res.status}` });
+      }
+    } catch {
+      toast.error("تعذّر الوصول إلى خدمة الاتصال المحلية");
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardContent className="space-y-3 p-4">
+        <div className="flex items-center gap-3">
+          <KeyRound className="size-4.5 text-primary" />
+          <div className="flex-1">
+            <h3 className="font-bold">مفتاح الذكاء الاصطناعي</h3>
+            <p className="text-xs text-muted-foreground">لتشغيل المساعد الذكي — يُحفظ على جهازك فقط</p>
+          </div>
+        </div>
+
+        {/* المزوّد */}
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">المزوّد</label>
+          <Select value={ai.provider} onValueChange={(v) => patchAi({ provider: v as AIProvider })} dir="rtl">
+            <SelectTrigger className="w-full" aria-label="اختيار المزوّد">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.keys(PROVIDER_LABELS) as AIProvider[]).map((p) => (
+                <SelectItem key={p} value={p}>
+                  {PROVIDER_LABELS[p]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* اسم الموديل */}
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">اسم الموديل</label>
+          <Input
+            value={ai.model}
+            onChange={(e) => patchAi({ model: e.target.value })}
+            placeholder={MODEL_HINTS[ai.provider]}
+            dir="ltr"
+            className="text-start"
+          />
+        </div>
+
+        {/* عنوان الخدمة لمزوّد آخر */}
+        {ai.provider === "custom" ? (
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">عنوان الخدمة (Base URL)</label>
+            <Input
+              value={ai.baseUrl ?? ""}
+              onChange={(e) => patchAi({ baseUrl: e.target.value })}
+              placeholder="https://example.com/v1"
+              dir="ltr"
+              className="text-start"
+            />
+            <p className="text-[11px] text-muted-foreground">أي خدمة متوافقة مع واجهة OpenAI</p>
+          </div>
+        ) : null}
+
+        {/* المفتاح */}
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">المفتاح</label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                type={showKey ? "text" : "password"}
+                value={ai.apiKey}
+                onChange={(e) => patchAi({ apiKey: e.target.value })}
+                placeholder="••••••••••••"
+                dir="ltr"
+                className="text-start pe-10"
+                autoComplete="off"
+              />
+              <button
+                type="button"
+                onClick={() => setShowKey((v) => !v)}
+                aria-label={showKey ? "إخفاء المفتاح" : "إظهار المفتاح"}
+                className="absolute inset-y-0 end-2 my-auto flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent"
+              >
+                {showKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={copyKey}
+              disabled={!ai.apiKey}
+              aria-label="نسخ المفتاح"
+              className="shrink-0"
+            >
+              <Copy className="size-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* ملاحظة اختيارية */}
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">ملاحظة (اختياري)</label>
+          <Textarea
+            value={ai.notes ?? ""}
+            onChange={(e) => patchAi({ notes: e.target.value })}
+            placeholder="مثلًا: هذا مفتاح الحساب المجاني — تجنب الاستخدام الكثيف…"
+            rows={2}
+            className="resize-none"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={testConnection} disabled={testing} className="shrink-0">
+            {testing ? <LoaderCircle className="size-4 animate-spin" /> : <PlugZap className="size-4" />}
+            {testing ? "جارٍ الاختبار…" : "اختبار الاتصال"}
+          </Button>
+          <p className="text-[11px] leading-snug text-muted-foreground">
+            يُحفظ المفتاح محليًا على جهازك، ولا يُرسل إلا للمزوّد عند استخدام المساعد الذكي.
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
@@ -302,6 +495,9 @@ export function SettingsView({ navigate }: { navigate: NavFn }) {
           </div>
         </CardContent>
       </Card>
+
+      {/* مفتاح الذكاء الاصطناعي */}
+      <AiKeyCard />
 
       {/* منطقة الخطر */}
       <Card className="border-destructive/40">

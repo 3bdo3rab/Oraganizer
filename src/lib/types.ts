@@ -127,6 +127,31 @@ export interface Note {
 /** نمط عرض الساعة */
 export type ClockFormat = "12" | "24";
 
+/** مزوّدو الذكاء الاصطناعي المدعومون */
+export type AIProvider = "google" | "openai" | "anthropic" | "groq" | "custom";
+
+/** إعدادات مفتاح الذكاء الاصطناعي — تُحفظ محليًا فقط */
+export interface AISettings {
+  provider: AIProvider;
+  /** اسم الموديل نص حر مثل gemini-2.5-flash */
+  model: string;
+  apiKey: string;
+  /** عنوان خدمة مخصّص لمزوّد «آخر» المتوافق مع OpenAI */
+  baseUrl?: string;
+  notes?: string;
+}
+
+/** رسالة في محادثة المساعد الذكي */
+export interface ChatMessage {
+  id: ID;
+  role: "user" | "assistant";
+  content: string;
+  /** رسالة خطأ اتصال تُعرض بستايل مميز */
+  isError?: boolean;
+  /** توقيت ISO */
+  at: string;
+}
+
 export interface AppSettings {
   appName: string;
   stageNames: [string, string, string];
@@ -134,6 +159,8 @@ export interface AppSettings {
   clockFormat?: ClockFormat;
   /** حجم الخط كنسبة مئوية: 90 / 100 / 110 / 125 */
   fontScale?: number;
+  /** مفتاح الذكاء الاصطناعي — الاستخدام الوحيد لخدمة خارجية */
+  ai?: AISettings;
 }
 
 export interface AppData {
@@ -146,4 +173,6 @@ export interface AppData {
   tasks: Task[];
   notes: Note[];
   settings: AppSettings;
+  /** محادثة المساعد الذكي — تُحفظ محليًا */
+  chat: ChatMessage[];
 }

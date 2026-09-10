@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
+  /* إخفاء زر أدوات التطوير حتى لا يغطي الزر العائم للمساعد */
+  devIndicators: false,
 };
 
 export default nextConfig;
